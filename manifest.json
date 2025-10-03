@@ -1,0 +1,17 @@
+{
+  "short_name": "Miar6",
+  "name": "Miar6 App",
+  "icons": [
+    {
+      "src": "fotos/loguito.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "/test22/index.html",
+  "scope": "/test22/",
+  "display": "standalone",
+  "background_color": "#F5F5F8",
+  "theme_color": "#F5F5F8",
+  "orientation": "portrait"
+}

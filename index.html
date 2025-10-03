@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Argentina - Principal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#362fc1">
+    <link rel="stylesheet" href="CARPETUTA/Inicio _ Mi Argentina_files/bdfdd2fc74c44aa9cc20ed953e9b03dee9545288.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Encode Sans', 'Roboto', Arial, sans-serif;
+            margin: 0;
+        }
+        .main-header {
+            background: #362cf1;
+            color: #fff;
+            padding: 0.7rem 0.8rem 0.7rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0 2px 8px rgba(61,50,182,0.07);
+        }
+        .main-header-left {
+            display: flex;
+            align-items: center;
+        }
+        .main-header img {
+            height: 32px;
+            margin-right: 10px;
+        }
+        .main-header-title {
+            font-size: 1.45rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+        }
+        .main-header-title .mi {
+            color: #bfc6f7;
+            font-weight: 400;
+        }
+        .main-header-user {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+        .main-header-usericon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+        .main-header-usericon svg {
+            width: 5px;
+            height: 5px;
+            color: #3d32b6;
+        }
+        .main-welcome {
+            text-align: center;
+            margin: 2rem 0 1rem 0;
+        }
+        .main-welcome h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .main-welcome p {
+            color: #444;
+            font-size: 1.1rem;
+        }
+        .botonera {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 2rem auto 2rem auto;
+            max-width: 900px;
+        }
+        .botonera-btn {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 1.2rem 1.5rem;
+            min-width: 140px;
+            max-width: 180px;
+            text-align: center;
+            color: #362FC1;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: box-shadow 0.2s, transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .botonera-btn:hover {
+            box-shadow: 0 4px 16px rgba(54,47,193,0.15);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .botonera-btn img {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 0.7rem;
+        }
+        .main-footer {
+            text-align: center;
+            color: #888;
+            font-size: 0.95rem;
+            margin: 2rem 0 1rem 0;
+        }
+        @media (max-width: 600px) {
+            .botonera {
+                gap: 0.7rem;
+            }
+            .botonera-btn {
+                min-width: 110px;
+                max-width: 130px;
+                font-size: 0.98rem;
+                padding: 0.7rem 0.5rem;
+            }
+            .botonera-btn img {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+        <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(function(reg) { console.log('Service Worker registrado:', reg.scope); })
+                    .catch(function(err) { console.log('Error al registrar Service Worker:', err); });
+            });
+        }
+        </script>
+<body>
+    <!-- Panel de edición de usuario tipo DNI (solo visible en #usersettings) -->
+    <div id="usersettings" class="dni-panel">
+        <div class="dni-panel-overlay" onclick="location.hash='';"></div>
+        <div class="dni-panel-content">
+            <div class="dni-panel-header">
+                <a href="#" class="dni-panel-back" aria-label="Volver">
+                    <svg width="28" height="28" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="#362fc1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <span class="dni-panel-title">Registro</span>
+            </div>
+            <div class="dni-card-container">
+                <div class="dni-card-bg">
+                    <img src="front.png" alt="DNI" class="dni-bg-img" style="height: auto;">
+                    <!-- Campos editables del usuario sobre la imagen, puedes moverlos a tu gusto -->
+                    <span id="dni_nombre" style="position: absolute; top: 50px; left: 60px; font-size: 13px; color: #222;"></span>
+                    <span id="dni_apellido" style="position: absolute; top: 70px; left: 60px; font-size: 13px; color: #222;"></span>
+                    <span id="dni_numero" style="position: absolute; top: 90px; left: 60px; font-size: 13px; color: #222;"></span>
+                    <span id="dni_nacimiento" style="position: absolute; top: 110px; left: 60px; font-size: 13px; color: #222;"></span>
+                    <span id="dni_domicilio" style="position: absolute; top: 130px; left: 60px; font-size: 13px; color: #222;"></span>
+                    <span id="dni_emision" style="position: absolute; top: 150px; left: 60px; font-size: 13px; color: #222;"></span>
+                    <span id="dni_sexo" style="position: absolute; top: 170px; left: 60px; font-size: 13px; color: #222;"></span>
+                    <!-- Firma -->
+                    <div class="DNI_content1Letters" style="position:absolute; top: 120px; left: 290px;">
+                        <canvas id="dni_firma_canvas" width="100" height="40" style="background:transparent;border:1px transparent;border-radius:7px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="dni-form">
+                <label style=" margin-top: 70px;">Nombre <input type="text" id="input_nombre" ></label>
+                <label>Apellido <input type="text" id="dni_nombre_apellido"></label>
+                <label>DNI <input type="text" id="input_dni"></label>
+                <label>Domicilio <input type="text" id="input_domicilio"></label>
+                <label>Nacimiento <input type="date" id="input_nacimiento"></label>
+                <label>Fecha de emisión <input type="date" id="input_emision"></label>
+                <label>Sexo
+                    <select id="input_sexo">
+                        <option value="">Seleccionar</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select>
+                </label>
+                <div style="margin: 2rem 0 0.2rem 0;">Firma</div>
+                <canvas id="firma_canvas" width="220" height="100" style="background:#fff;border:1.5px transparent #bbb;border-radius:7px;touch-action:none;"></canvas>
+                <button type="button" onclick="limpiarFirma()" style="margin:4rem 0 1rem 0;">Limpiar</button>
+                <div style="margin: 1rem 0 0.5rem 0;">Cámara</div>
+                <button type="button" onclick="abrirCamara()">Abrir cámara</button>
+                <video id="video_camara" width="220" height="80" autoplay style="display:none;margin-top:0.5rem;"></video>
+                <button type="button" onclick="capturarFoto()" style="display:none;" id="btn_capturar">Capturar foto</button>
+                <canvas id="foto_canvas" width="120" height="80" style="display:none;margin-top:0.5rem;"></canvas>
+            </div>
+        </div>
+    </div>
+    <style>
+    .dni-panel {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 20001;
+        display: none;
+    }
+    .dni-panel:target {
+        display: block;
+    }
+    .dni-panel-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(30,30,30,0.18);
+        z-index: 1;
+    }
+    .dni-panel-content {
+        position: absolute;
+        top: 0; left: 50%; transform: translateX(-50%);
+        width: 98vw; max-width: 420px;
+        background: #f9f9f9;
+        border-radius: 0 0 18px 18px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+        z-index: 2;
+        padding-bottom: 2rem;
+        overflow-y: auto;
+        max-height: 98vh;
+    }
+    .dni-panel-header {
+        background: #362fc1;
+        color: #fff;
+        padding: 0.7rem 0.8rem 0.7rem 0.8rem;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        position: sticky;
+        top: 0;
+        z-index: 3;
+    }
+    .dni-panel-back {
+        margin-right: 1rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+    .dni-panel-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .dni-card-container {
+        position: relative;
+        width: 100%;
+        margin: 1.2rem 0 1.2rem 0;
+        display: flex;
+        justify-content: center;
+    }
+    .dni-card-bg {
+        position: relative;
+        width: 340px;
+        height: 220px;
+    }
+    .dni-bg-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .DNI_content1Letters {
+        position: absolute;
+        color: #222;
+        font-family: 'Encode Sans', Arial, sans-serif;
+        pointer-events: none;
+        user-select: none;
+    }
+    .dni-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0 1.2rem;
+    }
+    .dni-form label {
+        font-size: 1rem;
+        color: #444;
+        margin-bottom: 0.2rem;
+        margin-top: 0.7rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .dni-form input, .dni-form select {
+        padding: 0.5rem 0.7rem;
+        border: 1.2px solid #bbb;
+        border-radius: 7px;
+        font-size: 1rem;
+        margin-top: 0.2rem;
+    }
+    .dni-form button {
+        background: #362fc1;
+        color: #fff;
+        border: none;
+        border-radius: 22px;
+        padding: 0.5rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+        cursor: pointer;
+        align-self: flex-start;
+    }
+    @media (max-width: 500px) {
+        .dni-panel-content { max-width: 99vw; }
+        .dni-card-bg { width: 98vw; max-width: 99vw; height: 180px; }
+    }
+    </style>
+    <script>
+    // Actualiza los campos del DNI en tiempo real
+    function updateDNIFields() {
+        document.getElementById('dni_nombre').textContent = document.getElementById('input_nombre').value || '';
+        document.getElementById('dni_apellido').textContent = document.getElementById('input_apellido').value || '';
+        document.getElementById('dni_numero').textContent = document.getElementById('input_dni').value || '';
+        document.getElementById('dni_nacimiento').textContent = document.getElementById('input_nacimiento').value || '';
+        document.getElementById('dni_domicilio').textContent = document.getElementById('input_domicilio').value || '';
+        document.getElementById('dni_emision').textContent = document.getElementById('input_emision').value || '';
+        document.getElementById('dni_sexo').textContent = document.getElementById('input_sexo').value || '';
+    }
+    ['input_nombre','input_apellido','input_dni','input_domicilio','input_nacimiento','input_emision','input_sexo'].forEach(id=>{
+        document.getElementById(id).addEventListener('input', updateDNIFields);
+        document.getElementById(id).addEventListener('change', updateDNIFields);
+    });
+    // Inicializar con los valores actuales
+    updateDNIFields();
+
+    // Firma en canvas
+    const firmaCanvas = document.getElementById('firma_canvas');
+    const dniFirmaCanvas = document.getElementById('dni_firma_canvas');
+    let drawing = false, lastX = 0, lastY = 0;
+    firmaCanvas.addEventListener('pointerdown', e => {
+        drawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
+    firmaCanvas.addEventListener('pointermove', e => {
+        if (!drawing) return;
+        const ctx = firmaCanvas.getContext('2d');
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#222';
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+        // Copia la firma al DNI
+        dniFirmaCanvas.getContext('2d').drawImage(firmaCanvas, 0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
+    });
+    firmaCanvas.addEventListener('pointerup', ()=>{ drawing = false; });
+    firmaCanvas.addEventListener('pointerleave', ()=>{ drawing = false; });
+    function limpiarFirma() {
+        firmaCanvas.getContext('2d').clearRect(0,0,firmaCanvas.width,firmaCanvas.height);
+        dniFirmaCanvas.getContext('2d').clearRect(0,0,dniFirmaCanvas.width,dniFirmaCanvas.height);
+    }
+
+    // Cámara
+    let stream = null;
+    function abrirCamara() {
+        const video = document.getElementById('video_camara');
+        const btn = document.getElementById('btn_capturar');
+        video.style.display = '';
+        btn.style.display = '';
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            stream = s;
+            video.srcObject = s;
+        });
+    }
+    function capturarFoto() {
+        const video = document.getElementById('video_camara');
+        const canvas = document.getElementById('foto_canvas');
+        canvas.style.display = '';
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Detener cámara
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        video.style.display = 'none';
+        document.getElementById('btn_capturar').style.display = 'none';
+    }
+    </script>
+    <div id="login-modal" class="login-modal">
+        <form id="login-form" class="login-form">
+            <h2>Iniciar sesión</h2>
+            <label for="login-gmail">Gmail</label>
+            <input type="email" id="login-gmail" required placeholder="ejemplo@gmail.com">
+            <label for="login-password">Contraseña</label>
+            <input type="password" id="login-password" required placeholder="Contraseña">
+            <div class="login-error" id="login-error" style="display:none;color:#c00;font-size:0.98rem;margin-bottom:0.7rem;"></div>
+            <button type="submit">Ingresar</button>
+            <div class="login-register-link">
+                ¿No tenés cuenta? <a href="#" id="show-register">Registrate</a>
+            </div>
+        </form>
+        <form id="register-form" class="login-form" style="display:none;">
+            <h2>Registro</h2>
+            <label for="register-gmail">Gmail</label>
+            <input type="email" id="register-gmail" required placeholder="ejemplo@gmail.com">
+            <label for="register-password">Contraseña</label>
+            <input type="password" id="register-password" required placeholder="Contraseña">
+            <div class="login-error" id="register-error" style="display:none;color:#c00;font-size:0.98rem;margin-bottom:0.7rem;"></div>
+            <button type="submit">Registrarse</button>
+            <div class="login-register-link">
+                ¿Ya tenés cuenta? <a href="#" id="show-login">Iniciar sesión</a>
+            </div>
+        </form>
+    </div>
+    <style>
+    .login-modal {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(245,245,245,0.98);
+        z-index: 20000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    .login-form {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+        padding: 2.2rem 2.2rem 1.5rem 2.2rem;
+        min-width: 320px;
+        max-width: 95vw;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        align-items: stretch;
+    }
+    .login-form h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+        text-align: center;
+    }
+    .login-form label {
+        font-size: 1rem;
+        color: #555;
+        margin-bottom: 0.2rem;
+        margin-top: 0.7rem;
+    }
+    .login-form input[type="email"],
+    .login-form input[type="password"] {
+        width: 91%;
+        padding: 0.9rem 1rem;
+        border: 1.5px solid #ddd;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        outline: none;
+    }
+    .login-form button {
+        background: #362fc1;
+        color: #fff;
+        border: none;
+        border-radius: 22px;
+        padding: 0.7rem 2.2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 0.7rem;
+        cursor: pointer;
+        margin-bottom: 1.2rem;
+    }
+    .login-register-link {
+        text-align: center;
+        font-size: 1rem;
+    }
+    .login-register-link a {
+        color: #362fc1;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    @media (max-width: 500px) {
+        .login-form {
+            min-width: 90vw;
+            padding: 1.2rem 0.5rem 1rem 0.5rem;
+        }
+    }
+    </style>
+    <script>
+    // Simulación de base de datos local (puedes reemplazar por SQL real en backend)
+    let users = JSON.parse(localStorage.getItem('users') || '{}');
+    function saveUsers() { localStorage.setItem('users', JSON.stringify(users)); }
+    function showLogin() {
+        document.getElementById('login-form').style.display = '';
+        document.getElementById('register-form').style.display = 'none';
+        document.getElementById('login-error').style.display = 'none';
+    }
+    function showRegister() {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('register-form').style.display = '';
+        document.getElementById('register-error').style.display = 'none';
+    }
+    document.getElementById('show-register').onclick = function(e){ e.preventDefault(); showRegister(); };
+    document.getElementById('show-login').onclick = function(e){ e.preventDefault(); showLogin(); };
+    document.getElementById('login-form').onsubmit = function(e){
+        e.preventDefault();
+        const gmail = document.getElementById('login-gmail').value.trim();
+        const pass = document.getElementById('login-password').value;
+        if(users[gmail] && users[gmail] === pass){
+            document.getElementById('login-modal').style.display = 'none';
+            document.body.style.overflow = '';
+            document.body.style.marginRight = '';
+        } else {
+            document.getElementById('login-error').textContent = 'Usuario o contraseña incorrectos.';
+            document.getElementById('login-error').style.display = '';
+        }
+    };
+    document.getElementById('register-form').onsubmit = function(e){
+        e.preventDefault();
+        const gmail = document.getElementById('register-gmail').value.trim();
+        const pass = document.getElementById('register-password').value;
+        if(users[gmail]){
+            document.getElementById('register-error').textContent = 'El usuario ya existe.';
+            document.getElementById('register-error').style.display = '';
+        } else {
+            users[gmail] = pass;
+            saveUsers();
+            showLogin();
+            document.getElementById('login-error').textContent = '¡Registrado correctamente! Ahora inicia sesión.';
+            document.getElementById('login-error').style.display = '';
+            // Si quieres permitir scroll tras registro exitoso, descomenta la siguiente línea:
+            // document.body.style.overflow = 'auto';
+        }
+    };
+    // Oculta el resto del contenido hasta login
+    if(!localStorage.getItem('loggedIn')){
+    document.body.style.overflow = 'hidden';
+    document.body.style.marginRight = '';
+    }
+    // Función para mostrar el modal de login/registro
+function showLoginModal() {
+    document.getElementById('login-modal').style.display = '';
+    document.body.style.overflow = 'hidden';
+    document.body.style.marginRight = '';
+}
+
+// Detectar cambio de hash para logout
+window.addEventListener('hashchange', function() {
+    if (location.hash === '#logout') {
+        localStorage.removeItem('loggedIn');
+        showLoginModal();
+        // Opcional: limpiar campos de login
+        document.getElementById('login-gmail').value = '';
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-error').style.display = 'none';
+        // Opcional: volver a la pantalla de login (no registro)
+        showLogin();
+        // Limpiar el hash para evitar bucles
+        location.hash = '';
+    }
+});
+
+// Si el usuario no está logueado al cargar, mostrar login
+if(!localStorage.getItem('loggedIn')){
+    showLoginModal();
+}
+    </script>
+    <header class="main-header">
+        <div class="main-header-left">
+            <a href="#menu" class="main-header-menuicon" style="margin-right: 3.5px; display: flex; align-items: center; ">
+                <!-- Ícono menú hamburguesa SVG -->
+                <svg width="26" height="58" viewBox="0 0 26 58" fill="none">
+                    <!--simbolo de menu-->
+                    <rect x="3" y="23" width="15" height="2.5" rx="1.25" fill="#fff"/>
+                    <rect x="3" y="27" width="15" height="2.5" rx="1.25" fill="#fff"/>
+                    <rect x="3" y="32" width="15" height="2.5" rx="1.25" fill="#fff"/>
+                </svg>
+            </a>
+            <img src="fotos/miar6-logo.svg" alt="Mi Argentina" style="height: auto; width: 135px; margin-bottom: 5px;">
+        
+            </span>
+        </div>
+        <div class="main-header-user">
+        <a href="#usersettings" class="main-header-usericon" aria-label="Usuario">
+            <span class="user-avatar">
+                <svg width="46" height="46" viewBox="0 0 32 32" fill="none">
+                    <!--contorno-->
+                    <circle cx="16" cy="16" r="15" stroke="#fff" stroke-width="2" fill="none"/>
+                    <!--cabeza-->
+                    <circle cx="16" cy="13" r="7" fill="#fff"/>
+                    <!--cuerpo-->
+                    <ellipse cx="16" cy="26" rx="12" ry="6" fill="#fff"/>
+                </svg>
+            </span>
+            <span class="user-arrow">
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+                    <path d="M1 12l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+        </a>
+    <style>
+        .main-header-usericon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: none;
+        }
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: none;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .user-avatar svg {
+            display: block;
+        }
+        .user-arrow {
+            display: flex;
+            align-items: center;
+            margin-left: 2px;
+        }
+        .user-arrow svg {
+            display: block;
+            margin-top: 2px;
+        }
+    </style>
+        </div>
+    <style>
+        .main-header-menuicon svg {
+            display: block;
+        }
+        .main-header-usericon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            color: #fff;
+            text-decoration: none;
+            transition: transparent;
+        }
+        .main-header-usericon:hover {
+            background: transparent;
+        }
+        .main-header-usericon svg:first-child {
+            width: 22px;
+            height: 22px;
+            color: #3c2fc1;
+        }
+    </style>
+    </header>
+    <section class="main-welcome">
+    <h1 id="main-saludo" style="font-weight: bold; font-size: 2.8rem; margin-top: 3.3rem;">¡Hola Usuario!</h1>
+    <script>
+
+        
+    // Mostrar panel de login al inicio y ocultar el resto hasta loguear
+function showLoginModal() {
+    document.getElementById('login-modal').style.display = '';
+    document.body.style.overflow = 'hidden';
+    document.body.style.marginRight = '';
+}
+// Si el usuario no está logueado al cargar, mostrar login
+if(!localStorage.getItem('loggedIn')){
+    showLoginModal();
+}
+
+// Detectar cambio de hash para logout
+window.addEventListener('hashchange', function() {
+    if (location.hash === '#logout') {
+        localStorage.removeItem('loggedIn');
+        showLoginModal();
+        document.getElementById('login-gmail').value = '';
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-error').style.display = 'none';
+        showLogin();
+        location.hash = '';
+    }
+});
+
+// Sincronizar nombre/apellido con saludo principal
+function updateSaludo() {
+    const nombre = document.getElementById('input_nombre')?.value || '';
+    document.getElementById('main-saludo').textContent = nombre ? `¡Hola ${nombre}!` : '¡Hola Usuario!';
+}
+if(document.getElementById('input_nombre')) {
+    document.getElementById('input_nombre').addEventListener('input', updateSaludo);
+}
+    <p style="font-size: 1.5rem; margin-top: 2.8rem;">Gestioná trámites, sacá turnos, accedé a tus <br> credenciales y recibí información personalizada.</p>
+   </script>
+        </section>
+
+    <!-- Paneles destacados -->
+    <section style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 3.05rem;">
+        <!-- Turnos programados -->
+        <div style="background: #fff; display: flex; align-items: center; padding: 2.2rem 2rem; min-width: 320px; max-width: 370px; flex: 1 1 320px; margin-bottom: 1rem; margin-top: 1.4rem; border: 1.5px solid rgba(0,0,0,0.2); border-radius: 8px;">
+            <img src="fotos/turn0_empty.svg" alt="Turnos" style="height: 70px; width: 40px; margin-right: 2rem;">
+            <div>
+                <h3 style="margin: -1rem 2rem -1rem 0; font-size: 1.55rem; color: #333; padding-bottom: 1.8rem; padding-left: 1.9rem;">No tenés turnos programados</h3>
+                <a href="#turnos" style="display: inline-block; background: #362FC1; color: #fff; border-radius: 12px; padding: 0.54rem 0.8rem; text-decoration: none; font-size: 1.05rem; font-weight: 600; padding-left: 1rem; margin-left: 2rem;"><b>Sacar turno</b></a>
+            </div>
+        </div>
+        <!-- Elecciones 2025 (estilo foto) -->
+        <div style="background: #fff; display: flex; align-items: center; padding: 1.6rem 3rem; min-width: 320px; max-width: 370px; flex: 1 1 340px; border: 1.5px solid #ededed; border-radius: 010px;">
+            <img src="fotos/where_voto.svg" alt="Elecciones 2025" style="height: 60px; width: 60px; margin-right: 1.1rem; margin-left: 0.2rem;">
+            <div style="border-left: 1.5px solid #e0e0e0; height: 48px; margin-right: 1.2rem;"></div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: bold; font-size: 1.6rem; color: #222; padding-top: 0rem;"><b>Elecciones 2025</b></span>
+                <span style="font-size: 1.3rem; color: #444;">Conocé donde votar en las próximas elecciones</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="botonera-contenedor">
+        <div class="botonera-titulo"><h4 style="font-weight: bold; font-size: 1.8rem;">¿Qué necesitás hoy?</h4></div>
+        <div class="botonera-grid">
+            <a class="botonera-btn2" href="#documentos">
+                <img src="fotos/icono-doc.svg" alt="Documentos">
+                <span style="font-size: 15px;">Documentos</span>
+            </a>
+            <a class="botonera-btn2" href="#vehiculos">
+                <img src="fotos/icono-vehc.svg" alt="Vehículos">
+                <span style="font-size: 15px;">Vehículos</span>
+            </a>
+            <a class="botonera-btn2" href="#trabajo">
+                <img src="fotos/icono-job.svg" alt="Trabajo">
+                <span style="font-size: 15px;">Trabajo</span>
+            </a>
+            <a class="botonera-btn2" href="#salud">
+                <img src="fotos/icono-vida.svg" alt="Salud">
+                <span style="font-size: 15px;">Salud</span>
+            </a>
+            <a class="botonera-btn2" href="#cobros">
+                <img src="fotos/icono-money.svg" alt="Cobros">
+                <span style="font-size: 15px;">Cobros</span>
+            </a>
+            <a class="botonera-btn2" href="#tramites">
+                <img src="fotos/icono-tramitoz.svg" alt="Trámites">
+                <span style="font-size: 15px;">Trámites</span>
+            </a>
+            <a class="botonera-btn2" href="#turnos">
+                <img src="fotos/icono-tiempo.svg" alt="Turnos">
+                <span style="font-size: 15px;">Turnos</span>
+            </a>
+            <a class="botonera-btn2" href="#hijos">
+                <img src="fotos/icono-fifos.svg" alt="Hijos">
+                <span style="font-size: 15px;">Hijos</span>
+            </a>
+        </div>
+    </section>
+    <style>
+        .botonera-contenedor {
+            background: #f3f3f3;
+            border-radius: 16px;
+            padding: 0rem 0 1.5rem 0;
+            max-width: 480px;
+            margin: 0 auto 2rem auto;
+        }
+        .botonera-titulo {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 1.1rem;
+            text-align: left;
+            padding-left: 1.2rem;
+        }
+        .botonera-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.7rem;
+            justify-items: center;
+        }
+        .botonera-btn2 {
+            background: #fff;
+            border-radius: 16px;
+            border: 1.5px solid #ededed;
+            box-shadow: none;
+            width: 100px;
+            height: 100px;
+            min-width: 0;
+            max-width: none;
+            padding: 0;
+            text-align: center;
+            color: #444;
+            font-weight: 500;
+            font-size: 1rem;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: border 0.2s, background 0.2s;
+        }
+        .botonera-btn2:hover {
+            border: 1.5px solid #362fc1;
+            background: #f5f7ff;
+        }
+        .botonera-btn2 img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 0.2rem;
+            filter: invert(27%) sepia(90%) saturate(7496%) hue-rotate(238deg) brightness(90%) contrast(101%);
+        }
+        .botonera-btn2 span {
+            color: #444;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+        @media (max-width: 600px) {
+            .botonera-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+            .botonera-btn2 {
+                width: 110px;
+                height: 120px;
+                font-size: 0.95rem;
+                padding: 0.05rem 0.2rem;
+            }
+            .botonera-btn2 img {
+                width: 46px;
+                height: 56px;
+            }
+        }
+    </style>
+    <!-- Paneles destacados debajo de la botonera principal -->
+    <section style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Feriados estilo destacado -->
+        <div style="background: #b0c2d4; border-radius: 12px; display: flex; align-items: center; padding: 1.2rem 2rem; min-width: 340px; max-width: 370px; flex: 1 1 340px; margin-bottom: 0.5rem; filter: saturate(1.5);">
+            <img src="fotos/icono-calenda.svg" alt="Feriados" style="height: 62px; width: 62px; margin-right: 2.2rem;">
+            <div>
+                <span style="color: #222; font-size: 1rem;">Próximo feriado</span><br>
+                <span style="font-weight: bold; font-size: 1.3rem; color: #222;"><B>12 de Octubre</B></span><br>
+                <span style="font-size: 1rem; color: #222;"><b>12 de octubre.</b> Día de la raza.</span>
+            </div>
+        </div>
+        <!-- Mantené tu perfil actualizado estilo destacado -->
+        <div style="background: #f5c9cf; border-radius: 12px; display: flex; align-items: center; padding: 1.2rem 2rem; min-width: 340px; max-width: 370px; flex: 1 1 340px; margin-bottom: 0.5rem; filter: saturate(1);">
+            <img src="fotos/icono-perful.svg" alt="Perfil" style="height: 76px; width: 56px; margin-right: 1.2rem; filter: saturate(2);">
+            <div>
+                <span style="font-weight: bold; font-size: 1.35rem; color: #222; margin-left: 15px;">Mantené tu perfil actualizado</span>
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+        <!--© 2025 Mi Argentina-->
+    </footer>
+    <!-- Sidebar de login -->
+        <!-- Guardado: login sidebar anterior
+        <div id="menu" class="sidebar-login">
+                <div class="sidebar-login-content">
+                        <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.2rem;">Ingresá a tu cuenta</h2>
+                        <label for="cuil" style="font-size:1rem;color:#555;margin-bottom:0.2rem;margin-top:0.7rem;">CUIL</label>
+                        <input type="text" id="cuil" placeholder=" " style="width:100%;padding:0.9rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:1.1rem;margin-bottom:0.5rem;outline:none;">
+                        <label for="password" style="font-size:1rem;color:#555;margin-bottom:0.2rem;margin-top:0.7rem;">Contraseña</label>
+                        <div class="input-password" style="position:relative;display:flex;align-items:center;">
+                                <input type="password" id="password" placeholder=" " style="width:100%;padding:0.9rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:1.1rem;margin-bottom:0.5rem;outline:none;">
+                                <span class="eye-icon" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);cursor:pointer;">
+                                        <svg width="24" height="24" fill="none"><circle cx="12" cy="12" r="10" stroke="#888" stroke-width="2"/><ellipse cx="12" cy="12" rx="4" ry="3" stroke="#888" stroke-width="2"/><circle cx="12" cy="12" r="1.5" fill="#888"/></svg>
+                                </span>
+                        </div>
+                        <a href="#" class="forgot-link" style="color:#362fc1;font-size:0.98rem;margin-bottom:0.7rem;text-decoration:underline;">¿Olvidaste tu contraseña?</a>
+                        <button class="btn-login" style="background:#362fc1;color:#fff;border:none;border-radius:22px;padding:0.7rem 2.2rem;font-size:1.1rem;font-weight:600;margin-top:0.7rem;cursor:pointer;margin-bottom:1.2rem;">Ingresar</button>
+                        <div class="divider" style="height:1.5rem;"></div>
+                        <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:0.7rem;">¿No tenés cuenta?</h3>
+                        <a href="#" class="btn-create" style="border:2px solid #362fc1;color:#362fc1;border-radius:22px;padding:0.7rem 2.2rem;font-size:1.1rem;font-weight:600;background:#fff;text-align:center;text-decoration:none;display:inline-block;">Creá tu cuenta</a>
+                </div>
+        </div>
+        -->
+
+        <!-- Sidebar perfil tipo app -->
+        <div id="menu" class="sidebar-profile">
+            <div class="sidebar-profile-header">
+                <a href="#" class="sidebar-back" aria-label="Volver">
+                    <svg width="28" height="28" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <span class="sidebar-profile-title">
+                    <span style="color:#7ec5f7;font-weight:bold;">mi</span><span style="font-weight:bold;">Argentina</span>
+                </span>
+                <div class="sidebar-profile-user">
+                    <div class="sidebar-profile-avatar">
+                        <svg width="80" height="80" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r="40" fill="#ddd"/>
+                            <ellipse cx="40" cy="35" rx="18" ry="20" fill="#aaa"/>
+                            <ellipse cx="40" cy="68" rx="25" ry="13" fill="#bbb"/>
+                        </svg>
+                    </div>
+                    <div class="sidebar-profile-info">
+                        <div class="sidebar-profile-name">Usuario Apellido</div>
+                        <div class="sidebar-profile-cuil">CUIL: 00-12.345.678-0</div>
+                        <div class="sidebar-profile-valid">Identidad validada</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-profile-list">
+                <a href="#" class="sidebar-profile-item"><img src="fotos/icono-doc.svg" alt="" /> Mi perfil</a>
+                <a href="#" class="sidebar-profile-item"><img src="fotos/icono-fifos.svg" alt="" /> Hijos/as asociados</a>
+                <a href="#" class="sidebar-profile-item"><img src="fotos/icono-money.svg" alt="" /> Suscribir servicios</a>
+                <hr>
+                <a href="#" class="sidebar-profile-item"><img src="fotos/icono-job.svg" alt="" /> Seguridad y privacidad</a>
+                <hr>
+                <a href="#" class="sidebar-profile-item"><b style="font-size:2rem;color:#888;margin-right:8px;">mi</b> Acerca de</a>
+                <a href="#" class="sidebar-profile-item"><img src="fotos/icono-tramitoz.svg" alt="" /> Términos y condiciones</a>
+                <hr>
+                <a href="#logout" class="sidebar-profile-item"><img src="fotos/icono-tiempo.svg" alt="" /> Cerrar sesión</a>
+            </div>
+        </div>
+        <style>
+            .sidebar-profile {
+                position: fixed;
+                top: 0;
+                left: -100vw;
+                width: 100vw;
+                max-width: 420px;
+                height: 100vh;
+                background: #fff;
+                box-shadow: 2px 0 16px rgba(0,0,0,0.12);
+                z-index: 9999;
+                transition: left 0.3s;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                padding: 0;
+            }
+            #menu:target {
+                left: 0;
+            }
+        .sidebar-profile-header {
+            background: #362fc1;
+            padding: 1.2rem 1.2rem 2.5rem 1.2rem;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            position: relative;
+        }
+        .sidebar-back {
+            position: absolute;
+            left: 1.2rem;
+            top: 1.2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .sidebar-profile-title {
+            display: block;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 1.2rem;
+        }
+        .sidebar-profile-user {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+        .sidebar-profile-avatar {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 0.7rem;
+        }
+        .sidebar-profile-avatar svg {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #fff;
+        }
+        .sidebar-profile-check {
+            position: absolute;
+            right: -5px;
+            bottom: -5px;
+            background: none;
+        }
+        .sidebar-profile-info {
+            text-align: center;
+            color: #fff;
+        }
+        .sidebar-profile-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+        }
+        .sidebar-profile-cuil {
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+        .sidebar-profile-valid {
+            font-size: 1rem;
+            color: #b2ffb2;
+        }
+        .sidebar-profile-list {
+            padding: 2rem 1.2rem 1.2rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .sidebar-profile-item {
+            display: flex;
+            align-items: center;
+            font-size: 1.15rem;
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.7rem 0;
+            border-radius: 8px;
+            transition: background 0.2s;
+            gap: 1rem;
+        }
+        .sidebar-profile-item img {
+            width: 28px;
+            height: 28px;
+            margin-right: 10px;
+            filter: grayscale(1) brightness(0.7);
+        }
+        .sidebar-profile-item:hover {
+            background: #f3f3f3;
+        }
+        .sidebar-profile hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 0.7rem 0;
+        }
+        @media (max-width: 500px) {
+            .sidebar-profile {
+                max-width: 100vw;
+                width: 100vw;
+            }
+            .sidebar-profile-header {
+                padding: 1.2rem 0.5rem 2.2rem 0.5rem;
+            }
+            .sidebar-profile-list {
+                padding: 1.2rem 0.5rem 0.5rem 0.5rem;
+            }
+        }
+        </style>
+</body>
+</html>
