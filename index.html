@@ -156,15 +156,65 @@
             <div class="dni-card-container">
                 <div class="dni-card-bg">
                     <img src="front.png" alt="DNI" class="dni-bg-img" style="height: auto;">
+
+
+
+
+                    <!-- Contenedor para la foto del DNI -->
+                    <img id="dni_foto" alt="Foto DNI" style="display: none;">
+                    
                     <!-- Campos editables del usuario sobre la imagen, puedes moverlos a tu gusto -->
-                    <span id="dni_nombre" style="position: absolute; top: 50px; left: 60px; font-size: 13px; color: #222;"></span>
-                    <span id="dni_apellido" style="position: absolute; top: 70px; left: 60px; font-size: 13px; color: #222;"></span>
-                    <span id="dni_numero" style="position: absolute; top: 90px; left: 60px; font-size: 13px; color: #222;"></span>
-                    <span id="dni_nacimiento" style="position: absolute; top: 110px; left: 60px; font-size: 13px; color: #222;"></span>
-                    <span id="dni_domicilio" style="position: absolute; top: 130px; left: 60px; font-size: 13px; color: #222;"></span>
-                    <span id="dni_emision" style="position: absolute; top: 150px; left: 60px; font-size: 13px; color: #222;"></span>
-                    <span id="dni_sexo" style="position: absolute; top: 170px; left: 60px; font-size: 13px; color: #222;"></span>
-                    <!-- Firma -->
+                    <span id="dni_nombre" style="  font-size: 13px; color: #222;"></span>
+                    <span id="dni_apellido" style="  font-size: 13px; color: #222;"></span>
+                    <span id="dni_numero" style="  font-size: 18px; color: #222;"><b></b></span>           
+                    <span id="dni_nacimiento" style="  font-size: 13px; color: #222;"></span>
+                    <span id="dni_nacionalidad" style="  font-size: 13px; color: #222;"></span>
+                    <span id="dni_emision" style="  font-size: 13px; color: #222;"></span>
+                    <span id="dni_vencimiento" style="  font-size:13px; color: #222;"></span>
+                    <span id="dni_sexo" style="  font-size: 13px; color: #222;"></span> 
+
+                    <style>
+  /* Estilo para la foto del DNI */
+  #dni_foto {
+    position: absolute;
+    width: 90px;
+    height: 120px;
+    cursor: move;
+    top: 40%;
+    left: 6.5%;
+    object-fit: cover;
+    border-radius: 3px;
+  }
+
+  /* stickers de texto */
+  #dni_nombre, 
+  #dni_apellido, 
+  #dni_nacimiento,
+  #dni_nacionalidad,
+  #dni_emision,
+  #dni_vencimiento,
+  #dni_sexo {
+    position: absolute;
+    color: black;
+    text-transform: uppercase;
+    font-size: 3%;    /* se escala con el contenedor */
+    background: transparent; /* opcional */
+    padding: 0.3em 0.5em;
+    border-radius: 4px;
+    
+  }
+
+  /* posiciones relativas en porcentajes */
+  #dni_nombre   { top: 25%; left: 33.5%; }
+  #dni_apellido { top: 40%; left: 33.5%; }
+  #dni_numero   { top: 120%; left: 5.3%; font-weight: bold; position: absolute; }
+  #dni_nacimiento { top: 70%; left: 33.45%; }
+  #dni_nacionalidad { top: 55%; left: 50%; }
+  #dni_emision { top: 85%; left: 33.5%; }
+  #dni_vencimiento { top: 100%; left: 33.5%; }
+  #dni_sexo { top: 55%; left: 33.5%; }
+</style>
+                    <!-- Firma en el DNI -->
                     <div class="DNI_content1Letters" style="position:absolute; top: 120px; left: 290px;">
                         <canvas id="dni_firma_canvas" width="100" height="40" style="background:transparent;border:1px transparent;border-radius:7px;"></canvas>
                     </div>
@@ -172,16 +222,17 @@
             </div>
             <div class="dni-form">
                 <label style=" margin-top: 70px;">Nombre <input type="text" id="input_nombre" ></label>
-                <label>Apellido <input type="text" id="dni_nombre_apellido"></label>
-                <label>DNI <input type="text" id="input_dni"></label>
-                <label>Domicilio <input type="text" id="input_domicilio"></label>
-                <label>Nacimiento <input type="date" id="input_nacimiento"></label>
-                <label>Fecha de emisión <input type="date" id="input_emision"></label>
+                <label style=" margin-top: 70px;">Apellido <input type="text" id="input_apellido" ></label>
+                <label style=" margin-top: 70px;">DNI <input type="text" id="input_dni" maxlength="8" placeholder="DNI"></label>
+                <div id="dni_numero_display"></div>
+                <label style=" margin-top: 70px;">nacionalidad <input type="text" id="input_nacionalidad" ></label>
+                <label style=" margin-top: 70px;">Nacimiento <input type="date" id="input_nacimiento" ></label>
+                <label style=" margin-top: 70px;">Emisión <input type="date" id="input_emision" ></label>
                 <label>Sexo
                     <select id="input_sexo">
                         <option value="">Seleccionar</option>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Femenino">Femenino</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
                     </select>
                 </label>
                 <div style="margin: 2rem 0 0.2rem 0;">Firma</div>
@@ -204,12 +255,6 @@
     }
     .dni-panel:target {
         display: block;
-    }
-    .dni-panel-overlay {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(30,30,30,0.18);
-        z-index: 1;
     }
     .dni-panel-content {
         position: absolute;
@@ -310,50 +355,208 @@
     }
     </style>
     <script>
+    // Función para formatear fechas
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        return d.toLocaleDateString('es-AR');
+    }
+
+    // Función para calcular fecha de vencimiento (15 años después de emisión)
+    function calcularVencimiento(fechaEmision) {
+        if (!fechaEmision) return '';
+        const emision = new Date(fechaEmision);
+        if (isNaN(emision)) return '';
+        const vencimiento = new Date(emision);
+        vencimiento.setFullYear(vencimiento.getFullYear() + 15);
+        return vencimiento;
+    }
+
+    // Función para formatear DNI con puntos
+    function formatDNI(dni) {
+        if (!dni) return '';
+        dni = dni.replace(/\D/g, ''); // Elimina no-números
+        if (dni.length <= 2) return dni;
+        if (dni.length <= 5) return dni.slice(0,2) + '.' + dni.slice(2);
+        if (dni.length <= 8) return dni.slice(0,2) + '.' + dni.slice(2,5) + '.' + dni.slice(5);
+        return dni.slice(0,2) + '.' + dni.slice(2,5) + '.' + dni.slice(5,8);
+    }
+
+    // Función para generar CUIL
+    function generarCUIL(dni, sexo) {
+        if (!dni || !sexo) return '';
+        dni = dni.replace(/\D/g, '');
+        if (dni.length !== 8) return '';
+        
+        // Generar prefijo según sexo (20 para M, 27 para F)
+        const prefijo = sexo === 'M' ? '20' : '27';
+        
+        // Generar último dígito aleatorio entre 2 y 9
+        const ultimoDigito = Math.floor(Math.random() * 8) + 2;
+        
+        return `${prefijo}-${formatDNI(dni)}-${ultimoDigito}`;
+    }
+
     // Actualiza los campos del DNI en tiempo real
     function updateDNIFields() {
-        document.getElementById('dni_nombre').textContent = document.getElementById('input_nombre').value || '';
-        document.getElementById('dni_apellido').textContent = document.getElementById('input_apellido').value || '';
-        document.getElementById('dni_numero').textContent = document.getElementById('input_dni').value || '';
-        document.getElementById('dni_nacimiento').textContent = document.getElementById('input_nacimiento').value || '';
-        document.getElementById('dni_domicilio').textContent = document.getElementById('input_domicilio').value || '';
-        document.getElementById('dni_emision').textContent = document.getElementById('input_emision').value || '';
-        document.getElementById('dni_sexo').textContent = document.getElementById('input_sexo').value || '';
+        const nombre = document.getElementById('input_nombre').value || '';
+        const apellido = document.getElementById('input_apellido').value || '';
+        const dni = document.getElementById('input_dni').value || '';
+        const sexo = document.getElementById('input_sexo').value;
+        
+        // Actualizar campos del DNI
+        document.getElementById('dni_nombre').textContent = nombre;
+        document.getElementById('dni_apellido').textContent = apellido;
+        document.getElementById('dni_numero').textContent = formatDNI(dni);
+        document.getElementById('dni_nacimiento').textContent = formatDate(document.getElementById('input_nacimiento').value) || '';
+        document.getElementById('dni_nacionalidad').textContent = document.getElementById('input_nacionalidad').value || '';
+        const fechaEmision = document.getElementById('input_emision').value;
+        document.getElementById('dni_emision').textContent = formatDate(fechaEmision) || '';
+        document.getElementById('dni_vencimiento').textContent = formatDate(calcularVencimiento(fechaEmision)) || '';
+        document.getElementById('dni_sexo').textContent = sexo;
+        
+        // Actualizar saludo y menú
+        const nombreCompleto = nombre && apellido ? `${nombre} ${apellido}` : 'Usuario';
+        document.getElementById('main-saludo').textContent = `¡Hola ${nombre || 'Usuario'}!`;
+        document.querySelector('.sidebar-profile-name').textContent = nombreCompleto;
+        
+        // Actualizar CUIL en el menú
+        const cuil = generarCUIL(dni, sexo);
+        if (cuil) {
+            document.querySelector('.sidebar-profile-cuil').textContent = `CUIL: ${cuil}`;
+        }
     }
-    ['input_nombre','input_apellido','input_dni','input_domicilio','input_nacimiento','input_emision','input_sexo'].forEach(id=>{
+    ['input_nombre','input_apellido','input_dni','input_nacionalidad','input_nacimiento','input_emision','input_sexo'].forEach(id=>{
         document.getElementById(id).addEventListener('input', updateDNIFields);
         document.getElementById(id).addEventListener('change', updateDNIFields);
     });
     // Inicializar con los valores actuales
     updateDNIFields();
 
+    // Hacer la foto movible
+    const dniFoto = document.getElementById('dni_foto');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    dniFoto.addEventListener('mousedown', dragStart);
+    dniFoto.addEventListener('mouseup', dragEnd);
+    dniFoto.addEventListener('mousemove', drag);
+    dniFoto.addEventListener('touchstart', dragStart);
+    dniFoto.addEventListener('touchend', dragEnd);
+    dniFoto.addEventListener('touchmove', drag);
+
+    function dragStart(e) {
+        if (e.type === 'mousedown') {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+        } else {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        }
+        if (e.target === dniFoto) {
+            isDragging = true;
+        }
+    }
+
+    function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            if (e.type === 'mousemove') {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            } else {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            }
+            xOffset = currentX;
+            yOffset = currentY;
+            dniFoto.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        }
+    }
+
     // Firma en canvas
     const firmaCanvas = document.getElementById('firma_canvas');
     const dniFirmaCanvas = document.getElementById('dni_firma_canvas');
-    let drawing = false, lastX = 0, lastY = 0;
-    firmaCanvas.addEventListener('pointerdown', e => {
-        drawing = true;
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-    });
-    firmaCanvas.addEventListener('pointermove', e => {
-        if (!drawing) return;
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    function iniciarDibujo(e) {
+        isDrawing = true;
+        const rect = firmaCanvas.getBoundingClientRect();
+        if (e.touches) {
+            lastX = e.touches[0].clientX - rect.left;
+            lastY = e.touches[0].clientY - rect.top;
+        } else {
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        }
+    }
+
+    function dibujar(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const rect = firmaCanvas.getBoundingClientRect();
+        let x, y;
+        if (e.touches) {
+            x = e.touches[0].clientX - rect.left;
+            y = e.touches[0].clientY - rect.top;
+        } else {
+            x = e.clientX - rect.left;
+            y = e.clientY - rect.top;
+        }
+        
         const ctx = firmaCanvas.getContext('2d');
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#222';
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
-        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
         ctx.stroke();
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-        // Copia la firma al DNI
-        dniFirmaCanvas.getContext('2d').drawImage(firmaCanvas, 0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
-    });
-    firmaCanvas.addEventListener('pointerup', ()=>{ drawing = false; });
-    firmaCanvas.addEventListener('pointerleave', ()=>{ drawing = false; });
+
+        // Copiar al DNI
+        const dniCtx = dniFirmaCanvas.getContext('2d');
+        dniCtx.clearRect(0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
+        dniCtx.drawImage(firmaCanvas, 0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
+
+        lastX = x;
+        lastY = y;
+    }
+
+    function detenerDibujo() {
+        isDrawing = false;
+    }
+
+    // Mouse events
+    firmaCanvas.addEventListener('mousedown', iniciarDibujo);
+    firmaCanvas.addEventListener('mousemove', dibujar);
+    firmaCanvas.addEventListener('mouseup', detenerDibujo);
+    firmaCanvas.addEventListener('mouseleave', detenerDibujo);
+
+    // Touch events
+    firmaCanvas.addEventListener('touchstart', iniciarDibujo, { passive: false });
+    firmaCanvas.addEventListener('touchmove', dibujar, { passive: false });
+    firmaCanvas.addEventListener('touchend', detenerDibujo);
+
     function limpiarFirma() {
-        firmaCanvas.getContext('2d').clearRect(0,0,firmaCanvas.width,firmaCanvas.height);
-        dniFirmaCanvas.getContext('2d').clearRect(0,0,dniFirmaCanvas.width,dniFirmaCanvas.height);
+        const ctx = firmaCanvas.getContext('2d');
+        ctx.clearRect(0, 0, firmaCanvas.width, firmaCanvas.height);
+        const dniCtx = dniFirmaCanvas.getContext('2d');
+        dniCtx.clearRect(0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
     }
 
     // Cámara
@@ -371,8 +574,15 @@
     function capturarFoto() {
         const video = document.getElementById('video_camara');
         const canvas = document.getElementById('foto_canvas');
+        const dniFoto = document.getElementById('dni_foto');
+        
+        // Capturar la foto en el canvas
         canvas.style.display = '';
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Mostrar la foto en el DNI
+        dniFoto.style.display = 'block';
+        dniFoto.src = canvas.toDataURL('image/jpeg');
         // Detener cámara
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -502,6 +712,7 @@
         const gmail = document.getElementById('login-gmail').value.trim();
         const pass = document.getElementById('login-password').value;
         if(users[gmail] && users[gmail] === pass){
+            localStorage.setItem('loggedIn', gmail); //para que aparezca como logeado
             document.getElementById('login-modal').style.display = 'none';
             document.body.style.overflow = '';
             document.body.style.marginRight = '';
@@ -520,6 +731,7 @@
         } else {
             users[gmail] = pass;
             saveUsers();
+            localStorage.setItem('loggedIn', gmail); // <<< opcional, si querés loguearlo directo
             showLogin();
             document.getElementById('login-error').textContent = '¡Registrado correctamente! Ahora inicia sesión.';
             document.getElementById('login-error').style.display = '';
@@ -693,8 +905,14 @@ function updateSaludo() {
 if(document.getElementById('input_nombre')) {
     document.getElementById('input_nombre').addEventListener('input', updateSaludo);
 }
-    <p style="font-size: 1.5rem; margin-top: 2.8rem;">Gestioná trámites, sacá turnos, accedé a tus <br> credenciales y recibí información personalizada.</p>
-   </script>
+    <p style="font-size: 1.5rem; margin-top: 2.8rem;">Gestioná trámites, sacá turnos, accedé a tus <br> credenciales y recibí información personalizada.</br></p>
+  // Mostrar saludo con el nombre del usuario logueado
+if(localStorage.getItem('loggedIn')){
+    let usuario = localStorage.getItem('loggedIn');
+    document.getElementById('main-saludo').textContent = "¡Hola " + usuario + "!";
+}
+
+  </script>
         </section>
 
     <!-- Paneles destacados -->
