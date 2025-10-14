@@ -205,14 +205,14 @@
   }
 
   /* posiciones relativas en porcentajes */
-  #dni_nombre   { top: 25%; left: 33.5%; }
-  #dni_apellido { top: 40%; left: 33.5%; }
-  #dni_numero   { top: 120%; left: 5.3%; font-weight: bold; position: absolute; }
-  #dni_nacimiento { top: 70%; left: 33.45%; }
-  #dni_nacionalidad { top: 55%; left: 50%; }
-  #dni_emision { top: 85%; left: 33.5%; }
-  #dni_vencimiento { top: 100%; left: 33.5%; }
-  #dni_sexo { top: 55%; left: 33.5%; }
+  #dni_nombre   { top: 41%; left: 33.5%; }
+  #dni_apellido { top: 25%; left: 33.5%; }
+  #dni_numero   { top: 123%; left: 5.3%; font-weight: bold; position: absolute; }
+  #dni_nacimiento { top: 74%; left: 33.45%; }
+  #dni_nacionalidad { top: 57%; left: 50%; }
+  #dni_emision { top: 88%; left: 33.5%; }
+  #dni_vencimiento { top: 104%; left: 33.5%; }
+  #dni_sexo { top: 57%; left: 33.5%; }
 </style>
                     <!-- Firma en el DNI -->
                     <div class="DNI_content1Letters" style="position:absolute; top: 120px; left: 290px;">
@@ -221,8 +221,8 @@
                 </div>
             </div>
             <div class="dni-form">
-                <label style=" margin-top: 70px;">Nombre <input type="text" id="input_nombre" ></label>
                 <label style=" margin-top: 70px;">Apellido <input type="text" id="input_apellido" ></label>
+                <label style=" margin-top: 70px;">Nombre <input type="text" id="input_nombre" ></label>               
                 <label style=" margin-top: 70px;">DNI <input type="text" id="input_dni" maxlength="8" placeholder="DNI"></label>
                 <div id="dni_numero_display"></div>
                 <label style=" margin-top: 70px;">nacionalidad <input type="text" id="input_nacionalidad" ></label>
@@ -239,10 +239,26 @@
                 <canvas id="firma_canvas" width="220" height="100" style="background:#fff;border:1.5px transparent #bbb;border-radius:7px;touch-action:none;"></canvas>
                 <button type="button" onclick="limpiarFirma()" style="margin:4rem 0 1rem 0;">Limpiar</button>
                 <div style="margin: 1rem 0 0.5rem 0;">Cámara</div>
-                <button type="button" onclick="abrirCamara()">Abrir cámara</button>
-                <video id="video_camara" width="220" height="80" autoplay style="display:none;margin-top:0.5rem;"></video>
-                <button type="button" onclick="capturarFoto()" style="display:none;" id="btn_capturar">Capturar foto</button>
-                <canvas id="foto_canvas" width="120" height="80" style="display:none;margin-top:0.5rem;"></canvas>
+                <button type="button" onclick="abrirCamara()" id="btn_abrir_camara">Abrir cámara</button>
+
+                <!-- Video en vivo -->
+                <video id="video_camara" width="320" height="240" autoplay playsinline style="display:none;margin-top:0.5rem;border-radius:7px;background:#000;"></video>
+                <div style="margin-top:0.5rem;">
+                    <button type="button" onclick="capturarFoto()" style="display:none;" id="btn_capturar">Capturar foto</button>
+                    <button type="button" onclick="cerrarCamara()" style="display:none;" id="btn_cerrar_camara">Cerrar cámara</button>
+                </div>
+
+                <!-- Preview con aceptar / cancelar -->
+                <div id="camara_preview" style="display:none;margin-top:0.5rem;gap:0.5rem;align-items:center;">
+                    <img id="foto_preview_img" alt="Preview" style="max-width:100%;border-radius:7px;border:1px solid #ddd;" />
+                    <div style="margin-top:0.5rem;">
+                        <button type="button" onclick="aceptarFoto()" id="btn_aceptar">Aceptar</button>
+                        <button type="button" onclick="cancelarFoto()" id="btn_cancelar">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Canvas donde se guardará la foto final (oculto si no querés mostrarlo) -->
+                <canvas id="foto_canvas" width="320" height="240" style="display:none;margin-top:0.5rem;"></canvas>
             </div>
         </div>
     </div>
@@ -559,38 +575,128 @@
         dniCtx.clearRect(0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
     }
 
-    // Cámara
-    let stream = null;
-    function abrirCamara() {
-        const video = document.getElementById('video_camara');
-        const btn = document.getElementById('btn_capturar');
-        video.style.display = '';
-        btn.style.display = '';
-        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-            stream = s;
-            video.srcObject = s;
-        });
-    }
-    function capturarFoto() {
-        const video = document.getElementById('video_camara');
-        const canvas = document.getElementById('foto_canvas');
-        const dniFoto = document.getElementById('dni_foto');
-        
-        // Capturar la foto en el canvas
-        canvas.style.display = '';
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Mostrar la foto en el DNI
-        dniFoto.style.display = 'block';
-        dniFoto.src = canvas.toDataURL('image/jpeg');
-        // Detener cámara
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
+    // Cámara: abrir, capturar, aceptar, cancelar
+    let _camaraStream = null;
+    const video_camara = document.getElementById('video_camara');
+    const btn_capturar = document.getElementById('btn_capturar');
+    const btn_cerrar_camara = document.getElementById('btn_cerrar_camara');
+    const camara_preview = document.getElementById('camara_preview');
+    const foto_preview_img = document.getElementById('foto_preview_img');
+    const foto_canvas = document.getElementById('foto_canvas');
+
+    // Compat wrapper para getUserMedia que maneja prefijos antiguos
+    function getUserMediaCompat(constraints) {
+        if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+            return navigator.mediaDevices.getUserMedia(constraints);
         }
-        video.style.display = 'none';
-        document.getElementById('btn_capturar').style.display = 'none';
+        const nav = navigator;
+        const getUserMedia = nav.getUserMedia || nav.webkitGetUserMedia || nav.mozGetUserMedia;
+        if (getUserMedia) {
+            return new Promise((resolve, reject) => {
+                getUserMedia.call(nav, constraints, resolve, reject);
+            });
+        }
+        return Promise.reject(new Error('getUserMedia no soportado por este navegador'));
     }
+
+    async function abrirCamara() {
+        try {
+            const constraints = { video: { facingMode: 'environment' }, audio: false };
+            _camaraStream = await getUserMediaCompat(constraints);
+            // En algunos browsers antiguos video_camara.srcObject no existe
+            try { video_camara.srcObject = _camaraStream; } catch (e) { video_camara.src = window.URL.createObjectURL(_camaraStream); }
+            video_camara.style.display = 'block';
+            btn_capturar.style.display = 'inline-block';
+            btn_cerrar_camara.style.display = 'inline-block';
+            camara_preview.style.display = 'none';
+            // Forzar reproducción en algunos móviles
+            if (typeof video_camara.play === 'function') await video_camara.play();
+        } catch (err) {
+            console.error('abrirCamara error', err);
+            let msg = 'No se pudo acceder a la cámara: ';
+            if (err && err.name === 'NotAllowedError') msg += 'Permiso denegado. Por favor permite el acceso a la cámara.';
+            else if (err && err.message) msg += err.message;
+            else msg += String(err);
+            msg += '\n\nNota: la cámara requiere HTTPS o localhost en muchos navegadores. Si abriste el archivo con file:// prueba sirviendo la carpeta en http://localhost o vía HTTPS.';
+            alert(msg);
+        }
+    }
+
+    function capturarFoto() {
+        if (!video_camara || !video_camara.videoWidth) {
+            alert('Espera a que la cámara se active.');
+            return;
+        }
+        const w = video_camara.videoWidth;
+        const h = video_camara.videoHeight;
+        // Usamos un canvas temporal para obtener la imagen
+        const tmp = document.createElement('canvas');
+        tmp.width = w;
+        tmp.height = h;
+        const ctx = tmp.getContext('2d');
+        ctx.drawImage(video_camara, 0, 0, w, h);
+        const dataUrl = tmp.toDataURL('image/jpeg', 0.9);
+        // Mostrar preview y opciones
+        foto_preview_img.src = dataUrl;
+        camara_preview.style.display = 'flex';
+        // Pausar video para que el usuario vea la captura
+        video_camara.pause();
+        btn_capturar.style.display = 'none';
+    }
+
+    function aceptarFoto() {
+        // Dibujar la imagen del preview en el canvas final
+        const img = foto_preview_img;
+        if (!img.src) return;
+        // Ajustar canvas al tamaño natural de la imagen (o mantener tamaño fijo)
+        foto_canvas.width = img.naturalWidth || foto_canvas.width;
+        foto_canvas.height = img.naturalHeight || foto_canvas.height;
+        const ctx = foto_canvas.getContext('2d');
+        ctx.clearRect(0, 0, foto_canvas.width, foto_canvas.height);
+        ctx.drawImage(img, 0, 0, foto_canvas.width, foto_canvas.height);
+
+        // Poner la foto aceptada en el elemento del DNI (si existe)
+        const dniFoto = document.getElementById('dni_foto');
+        if (dniFoto) {
+            dniFoto.src = foto_canvas.toDataURL('image/png');
+        }
+
+        // Cerrar y liberar cámara
+        cerrarCamara();
+    }
+
+    function cancelarFoto() {
+        // Ocultar preview y reanudar video para intentar otra captura
+        camara_preview.style.display = 'none';
+        if (video_camara.srcObject) {
+            video_camara.play().catch(()=>{});
+            btn_capturar.style.display = 'inline-block';
+        } else {
+            // Si no hay cámara activa, ocultar controles
+            btn_capturar.style.display = 'none';
+        }
+    }
+
+    function cerrarCamara() {
+        if (_camaraStream) {
+            _camaraStream.getTracks().forEach(t => t.stop());
+            _camaraStream = null;
+        }
+        if (video_camara) {
+            video_camara.srcObject = null;
+            video_camara.style.display = 'none';
+        }
+        btn_capturar.style.display = 'none';
+        btn_cerrar_camara.style.display = 'none';
+        camara_preview.style.display = 'none';
+    }
+
+    // Limpiar al salir de la página (por si queda la cámara abierta)
+    window.addEventListener('beforeunload', () => {
+        if (_camaraStream) {
+            _camaraStream.getTracks().forEach(t => t.stop());
+        }
+    });
     </script>
     <div id="login-modal" class="login-modal">
         <form id="login-form" class="login-form">
