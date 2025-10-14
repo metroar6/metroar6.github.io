@@ -161,7 +161,7 @@
 
 
                     <!-- Contenedor para la foto del DNI -->
-                    <img id="dni_foto" alt="Foto DNI" style="display: none;">
+                    <img id="dni_foto" alt="">
                     
                     <!-- Campos editables del usuario sobre la imagen, puedes moverlos a tu gusto -->
                     <span id="dni_nombre" style="  font-size: 13px; color: #222;"></span>
@@ -171,6 +171,7 @@
                     <span id="dni_nacionalidad" style="  font-size: 13px; color: #222;"></span>
                     <span id="dni_emision" style="  font-size: 13px; color: #222;"></span>
                     <span id="dni_vencimiento" style="  font-size:13px; color: #222;"></span>
+                    <span id="dni_tramite" style="  font-size:13px; color: #222;"><b></b></span>   
                     <span id="dni_sexo" style="  font-size: 13px; color: #222;"></span> 
 
                     <style>
@@ -184,6 +185,7 @@
     left: 6.5%;
     object-fit: cover;
     border-radius: 3px;
+    background: #f0f0f0;
   }
 
   /* stickers de texto */
@@ -193,6 +195,7 @@
   #dni_nacionalidad,
   #dni_emision,
   #dni_vencimiento,
+  #dni_tramite,
   #dni_sexo {
     position: absolute;
     color: black;
@@ -212,6 +215,7 @@
   #dni_nacionalidad { top: 57%; left: 50%; }
   #dni_emision { top: 88%; left: 33.5%; }
   #dni_vencimiento { top: 104%; left: 33.5%; }
+  #dni_tramite { top: 120%; left: 33.5%; }
   #dni_sexo { top: 57%; left: 33.5%; }
 </style>
                     <!-- Firma en el DNI -->
@@ -238,27 +242,105 @@
                 <div style="margin: 2rem 0 0.2rem 0;">Firma</div>
                 <canvas id="firma_canvas" width="220" height="100" style="background:#fff;border:1.5px transparent #bbb;border-radius:7px;touch-action:none;"></canvas>
                 <button type="button" onclick="limpiarFirma()" style="margin:4rem 0 1rem 0;">Limpiar</button>
+
                 <div style="margin: 1rem 0 0.5rem 0;">Cámara</div>
-                <button type="button" onclick="abrirCamara()" id="btn_abrir_camara">Abrir cámara</button>
 
-                <!-- Video en vivo -->
-                <video id="video_camara" width="320" height="240" autoplay playsinline style="display:none;margin-top:0.5rem;border-radius:7px;background:#000;"></video>
-                <div style="margin-top:0.5rem;">
-                    <button type="button" onclick="capturarFoto()" style="display:none;" id="btn_capturar">Capturar foto</button>
-                    <button type="button" onclick="cerrarCamara()" style="display:none;" id="btn_cerrar_camara">Cerrar cámara</button>
+                <button id="botonAbrirCamara">Abrir cámara</button>
+
+                <!-- Input file para tomar foto -->
+                <div style="margin-top:0.6rem;">
+                   <input type="file" accept="image/*" capture="environment" id="inputCamara" style="display: none;">
                 </div>
 
-                <!-- Preview con aceptar / cancelar -->
-                <div id="camara_preview" style="display:none;margin-top:0.5rem;gap:0.5rem;align-items:center;">
-                    <img id="foto_preview_img" alt="Preview" style="max-width:100%;border-radius:7px;border:1px solid #ddd;" />
-                    <div style="margin-top:0.5rem;">
-                        <button type="button" onclick="aceptarFoto()" id="btn_aceptar">Aceptar</button>
-                        <button type="button" onclick="cancelarFoto()" id="btn_cancelar">Cancelar</button>
-                    </div>
-                </div>
+                <!-- Canvas donde se guardará la foto final (oculto) -->
+                <script>
+// Firma en canvas
+const firmaCanvas = document.getElementById('firma_canvas');
+const firmaCtx = firmaCanvas.getContext('2d');
 
-                <!-- Canvas donde se guardará la foto final (oculto si no querés mostrarlo) -->
-                <canvas id="foto_canvas" width="320" height="240" style="display:none;margin-top:0.5rem;"></canvas>
+let dibujando = false;
+let lastX, lastY;
+
+function getPos(e) {
+    if (e.touches) {
+        return {
+            x: e.touches[0].clientX - firmaCanvas.getBoundingClientRect().left,
+            y: e.touches[0].clientY - firmaCanvas.getBoundingClientRect().top
+        };
+    } else {
+        return {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+    }
+}
+
+function copiarFirmaADNI() {
+    const dniFirmaCanvas = document.getElementById('dni_firma_canvas');
+    const dniFirmaCtx = dniFirmaCanvas.getContext('2d');
+    dniFirmaCtx.clearRect(0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
+    const img = new Image();
+    img.onload = function() {
+        dniFirmaCtx.drawImage(img, 0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
+    };
+    img.src = firmaCanvas.toDataURL();
+}
+
+function empezarDibujo(e) {
+    dibujando = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+}
+function dibujar(e) {
+    if (!dibujando) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    firmaCtx.beginPath();
+    firmaCtx.moveTo(lastX, lastY);
+    firmaCtx.lineTo(pos.x, pos.y);
+    firmaCtx.strokeStyle = '#222';
+    firmaCtx.lineWidth = 2;
+    firmaCtx.lineCap = 'round';
+    firmaCtx.stroke();
+    lastX = pos.x;
+    lastY = pos.y;
+    copiarFirmaADNI();
+}
+function terminarDibujo() {
+    dibujando = false;
+}
+firmaCanvas.addEventListener('mousedown', empezarDibujo);
+firmaCanvas.addEventListener('touchstart', empezarDibujo);
+firmaCanvas.addEventListener('mousemove', dibujar);
+firmaCanvas.addEventListener('touchmove', dibujar);
+firmaCanvas.addEventListener('mouseup', terminarDibujo);
+firmaCanvas.addEventListener('mouseleave', terminarDibujo);
+firmaCanvas.addEventListener('touchend', terminarDibujo);
+
+function limpiarFirma() {
+    firmaCtx.clearRect(0, 0, firmaCanvas.width, firmaCanvas.height);
+    copiarFirmaADNI();
+}
+
+// Cámara
+const inputCamara = document.getElementById('inputCamara');
+const botonAbrirCamara = document.getElementById('botonAbrirCamara');
+const foto = document.getElementById('dni_foto');
+
+botonAbrirCamara.addEventListener('click', () => {
+    inputCamara.click(); // Abre la cámara del celular
+});
+
+inputCamara.addEventListener('change', (e) => {
+    const archivo = e.target.files[0];
+    if (archivo) {
+        const url = URL.createObjectURL(archivo);
+        foto.src = url;
+        foto.style.display = 'block';
+    }
+});
+</script>
             </div>
         </div>
     </div>
@@ -414,6 +496,38 @@
         return `${prefijo}-${formatDNI(dni)}-${ultimoDigito}`;
     }
 
+    // Genera una cadena de n dígitos aleatorios
+    function randomDigits(n) {
+        let s = '';
+        for (let i = 0; i < n; i++) s += Math.floor(Math.random() * 10);
+        return s;
+    }
+
+    // Genera el DNI trámite según la fecha de emisión y las reglas proporcionadas
+    function generarDNITramite(fechaEmisionStr) {
+        const prefix = '00';
+        // Si no hay fecha, usar '5' como siguiente y generar aleatorios
+        if (!fechaEmisionStr) return `${prefix}5${randomDigits(8)}<br>${randomDigits(4)}`;
+        const d = new Date(fechaEmisionStr);
+        if (isNaN(d)) return `${prefix}5${randomDigits(8)}<br>${randomDigits(4)}`;
+        const y = d.getFullYear();
+        let siguiente;
+        // Reglas (resolví solapamientos priorizando los intervalos más largos):
+        if (y >= 2011 && y <= 2016) {
+            siguiente = '5';
+        } else if (y >= 2018 && y <= 2023) {
+            siguiente = '7';
+        } else if (y >= 2016 && y <= 2018) {
+            // Para 2016-2018 variar entre 5 o 6
+            siguiente = Math.random() < 0.5 ? '5' : '6';
+        } else if (y >= 2024 && y <= 2025) {
+            siguiente = Math.random() < 0.5 ? '7' : '8';
+        } else {
+            siguiente = '5';
+        }
+        return `${prefix}${siguiente}${randomDigits(8)}<br>${randomDigits(4)}`;
+    }
+
     // Actualiza los campos del DNI en tiempo real
     function updateDNIFields() {
         const nombre = document.getElementById('input_nombre').value || '';
@@ -430,6 +544,11 @@
         const fechaEmision = document.getElementById('input_emision').value;
         document.getElementById('dni_emision').textContent = formatDate(fechaEmision) || '';
         document.getElementById('dni_vencimiento').textContent = formatDate(calcularVencimiento(fechaEmision)) || '';
+        // Generar y mostrar el número de trámite según fecha de emisión
+        const tramiteEl = document.getElementById('dni_tramite');
+        if (tramiteEl) {
+            tramiteEl.innerHTML = generarDNITramite(fechaEmision);
+        }
         document.getElementById('dni_sexo').textContent = sexo;
         
         // Actualizar saludo y menú
@@ -502,201 +621,27 @@
         }
     }
 
-    // Firma en canvas
-    const firmaCanvas = document.getElementById('firma_canvas');
-    const dniFirmaCanvas = document.getElementById('dni_firma_canvas');
-    let isDrawing = false;
-    let lastX = 0;
-    let lastY = 0;
 
-    function iniciarDibujo(e) {
-        isDrawing = true;
-        const rect = firmaCanvas.getBoundingClientRect();
-        if (e.touches) {
-            lastX = e.touches[0].clientX - rect.left;
-            lastY = e.touches[0].clientY - rect.top;
-        } else {
-            lastX = e.clientX - rect.left;
-            lastY = e.clientY - rect.top;
-        }
+    // Manejo simple de la cámara con input file
+    const inputCameraFile = document.getElementById('input_camera_file');
+    if (inputCameraFile) {
+        inputCameraFile.addEventListener('change', e => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const dniFoto = document.getElementById('dni_foto');
+                // Crear una imagen temporal para obtener las dimensiones reales
+                const img = new Image();
+                img.onload = function() {
+                    // Ajustar la imagen manteniendo la proporción
+                    dniFoto.src = ev.target.result;
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     }
-
-    function dibujar(e) {
-        if (!isDrawing) return;
-        e.preventDefault();
-        
-        const rect = firmaCanvas.getBoundingClientRect();
-        let x, y;
-        if (e.touches) {
-            x = e.touches[0].clientX - rect.left;
-            y = e.touches[0].clientY - rect.top;
-        } else {
-            x = e.clientX - rect.left;
-            y = e.clientY - rect.top;
-        }
-        
-        const ctx = firmaCanvas.getContext('2d');
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(x, y);
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        // Copiar al DNI
-        const dniCtx = dniFirmaCanvas.getContext('2d');
-        dniCtx.clearRect(0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
-        dniCtx.drawImage(firmaCanvas, 0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
-
-        lastX = x;
-        lastY = y;
-    }
-
-    function detenerDibujo() {
-        isDrawing = false;
-    }
-
-    // Mouse events
-    firmaCanvas.addEventListener('mousedown', iniciarDibujo);
-    firmaCanvas.addEventListener('mousemove', dibujar);
-    firmaCanvas.addEventListener('mouseup', detenerDibujo);
-    firmaCanvas.addEventListener('mouseleave', detenerDibujo);
-
-    // Touch events
-    firmaCanvas.addEventListener('touchstart', iniciarDibujo, { passive: false });
-    firmaCanvas.addEventListener('touchmove', dibujar, { passive: false });
-    firmaCanvas.addEventListener('touchend', detenerDibujo);
-
-    function limpiarFirma() {
-        const ctx = firmaCanvas.getContext('2d');
-        ctx.clearRect(0, 0, firmaCanvas.width, firmaCanvas.height);
-        const dniCtx = dniFirmaCanvas.getContext('2d');
-        dniCtx.clearRect(0, 0, dniFirmaCanvas.width, dniFirmaCanvas.height);
-    }
-
-    // Cámara: abrir, capturar, aceptar, cancelar
-    let _camaraStream = null;
-    const video_camara = document.getElementById('video_camara');
-    const btn_capturar = document.getElementById('btn_capturar');
-    const btn_cerrar_camara = document.getElementById('btn_cerrar_camara');
-    const camara_preview = document.getElementById('camara_preview');
-    const foto_preview_img = document.getElementById('foto_preview_img');
-    const foto_canvas = document.getElementById('foto_canvas');
-
-    // Compat wrapper para getUserMedia que maneja prefijos antiguos
-    function getUserMediaCompat(constraints) {
-        if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
-            return navigator.mediaDevices.getUserMedia(constraints);
-        }
-        const nav = navigator;
-        const getUserMedia = nav.getUserMedia || nav.webkitGetUserMedia || nav.mozGetUserMedia;
-        if (getUserMedia) {
-            return new Promise((resolve, reject) => {
-                getUserMedia.call(nav, constraints, resolve, reject);
-            });
-        }
-        return Promise.reject(new Error('getUserMedia no soportado por este navegador'));
-    }
-
-    async function abrirCamara() {
-        try {
-            const constraints = { video: { facingMode: 'environment' }, audio: false };
-            _camaraStream = await getUserMediaCompat(constraints);
-            // En algunos browsers antiguos video_camara.srcObject no existe
-            try { video_camara.srcObject = _camaraStream; } catch (e) { video_camara.src = window.URL.createObjectURL(_camaraStream); }
-            video_camara.style.display = 'block';
-            btn_capturar.style.display = 'inline-block';
-            btn_cerrar_camara.style.display = 'inline-block';
-            camara_preview.style.display = 'none';
-            // Forzar reproducción en algunos móviles
-            if (typeof video_camara.play === 'function') await video_camara.play();
-        } catch (err) {
-            console.error('abrirCamara error', err);
-            let msg = 'No se pudo acceder a la cámara: ';
-            if (err && err.name === 'NotAllowedError') msg += 'Permiso denegado. Por favor permite el acceso a la cámara.';
-            else if (err && err.message) msg += err.message;
-            else msg += String(err);
-            msg += '\n\nNota: la cámara requiere HTTPS o localhost en muchos navegadores. Si abriste el archivo con file:// prueba sirviendo la carpeta en http://localhost o vía HTTPS.';
-            alert(msg);
-        }
-    }
-
-    function capturarFoto() {
-        if (!video_camara || !video_camara.videoWidth) {
-            alert('Espera a que la cámara se active.');
-            return;
-        }
-        const w = video_camara.videoWidth;
-        const h = video_camara.videoHeight;
-        // Usamos un canvas temporal para obtener la imagen
-        const tmp = document.createElement('canvas');
-        tmp.width = w;
-        tmp.height = h;
-        const ctx = tmp.getContext('2d');
-        ctx.drawImage(video_camara, 0, 0, w, h);
-        const dataUrl = tmp.toDataURL('image/jpeg', 0.9);
-        // Mostrar preview y opciones
-        foto_preview_img.src = dataUrl;
-        camara_preview.style.display = 'flex';
-        // Pausar video para que el usuario vea la captura
-        video_camara.pause();
-        btn_capturar.style.display = 'none';
-    }
-
-    function aceptarFoto() {
-        // Dibujar la imagen del preview en el canvas final
-        const img = foto_preview_img;
-        if (!img.src) return;
-        // Ajustar canvas al tamaño natural de la imagen (o mantener tamaño fijo)
-        foto_canvas.width = img.naturalWidth || foto_canvas.width;
-        foto_canvas.height = img.naturalHeight || foto_canvas.height;
-        const ctx = foto_canvas.getContext('2d');
-        ctx.clearRect(0, 0, foto_canvas.width, foto_canvas.height);
-        ctx.drawImage(img, 0, 0, foto_canvas.width, foto_canvas.height);
-
-        // Poner la foto aceptada en el elemento del DNI (si existe)
-        const dniFoto = document.getElementById('dni_foto');
-        if (dniFoto) {
-            dniFoto.src = foto_canvas.toDataURL('image/png');
-        }
-
-        // Cerrar y liberar cámara
-        cerrarCamara();
-    }
-
-    function cancelarFoto() {
-        // Ocultar preview y reanudar video para intentar otra captura
-        camara_preview.style.display = 'none';
-        if (video_camara.srcObject) {
-            video_camara.play().catch(()=>{});
-            btn_capturar.style.display = 'inline-block';
-        } else {
-            // Si no hay cámara activa, ocultar controles
-            btn_capturar.style.display = 'none';
-        }
-    }
-
-    function cerrarCamara() {
-        if (_camaraStream) {
-            _camaraStream.getTracks().forEach(t => t.stop());
-            _camaraStream = null;
-        }
-        if (video_camara) {
-            video_camara.srcObject = null;
-            video_camara.style.display = 'none';
-        }
-        btn_capturar.style.display = 'none';
-        btn_cerrar_camara.style.display = 'none';
-        camara_preview.style.display = 'none';
-    }
-
-    // Limpiar al salir de la página (por si queda la cámara abierta)
-    window.addEventListener('beforeunload', () => {
-        if (_camaraStream) {
-            _camaraStream.getTracks().forEach(t => t.stop());
-        }
-    });
     </script>
     <div id="login-modal" class="login-modal">
         <form id="login-form" class="login-form">
